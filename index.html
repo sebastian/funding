@@ -31,7 +31,7 @@
       
       <form class="form-horizontal">
       <div class="row">
-        <div class="span6">
+        <div class="span4">
           <fieldset>
             <legend>Cash flow</legend>
             <div class="control-group">
@@ -60,7 +60,7 @@
           </fieldset>
         </div>
 
-        <div class="span6">
+        <div class="span4">
           <fieldset>
             <legend>Revenue from users</legend>
             <div class="control-group">
@@ -100,20 +100,32 @@
             </span>
           </fieldset>
         </div>
-      </div>
-      </form>
 
-      <div class="row">
-        <div class="span3">
-          <label class="control-label" for="sim_length">Simulate</label></br>
-          <select name="sim_length" id="sim_length" class="span2 input-xlarge">
-            <option value="6">6 months</option>
-            <option value="12">1 year</option>
-          </select>
-        </div>
-        <div class="span9" id="visualization"></div>
-      </div>
+        <div class="span4">
+          <fieldset>
+            <legend>"Simulation"</legend>
+            <div class="control-group">
+              <label class="control-label" for="amount_paid">Simulation length</label>
+              <div class="controls">
+                <select name="sim_length" id="sim_length" class="span2 input-xlarge">
+                  <option value="6">6 months</option>
+                  <option value="12">1 year</option>
+                  <option value="24">2 year</option>
+                  <option value="36">3 year</option>
+                  <option value="48">4 year</option>
+                </select>
+              </div> <!-- // controls -->
+            </div> <!-- // control group -->
+          </fieldset>
+        </div> <!-- // span -->
+
+      </div> <!-- // row -->
+      </form>
       
+      <div class="row">
+        <div class="span12" id="visualization"></div>
+      </div>
+
       <table class="table table-striped table-condensed">
         <th>
           <td>Cash</td>
@@ -200,6 +212,8 @@
           var sim_length = parseInt(this.sim_length);
 
           for(var i = 0; i < sim_length; i++) {
+            var year_num = parseInt(i / 12);
+
             var income = 0;
             var expenses = 0;
 
@@ -212,15 +226,22 @@
 
             if (this.users.payment_frequency == 'monthly') {
               // Account for user churn
-              users = users * (100 - churn_rate)/100.0;
+              var churn = parseInt((users * churn_rate) / 100);
               // Add new users this month
-              users = users + monthly_new;
+              users = users + monthly_new - churn;
               income = income + users * price;
             }
 
             if (this.users.payment_frequency == 'yearly') {
+              var churn = 0;
+              if (year_num > 0) {
+                // Some of the contracts for the users are renewed.
+                // We need to account for churn
+                churn = parseInt((monthly_new * year_num * churn_rate)/100);
+              }
+
               // Add new users this month
-              users = users + monthly_new;
+              users = users + monthly_new - churn;
               income = income + monthly_new * price;
             }
 
