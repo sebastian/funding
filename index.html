@@ -113,6 +113,7 @@
                   <option value="24">2 year</option>
                   <option value="36">3 year</option>
                   <option value="48">4 year</option>
+                  <option value="60">5 year</option>
                 </select>
               </div> <!-- // controls -->
             </div> <!-- // control group -->
@@ -147,13 +148,13 @@
     <!-- Le javascript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-    <script src="http://code.angularjs.org/angular-0.9.12.js" ng:autobind></script>
+    <script type="text/javascript" src="http://code.angularjs.org/angular-0.9.12.js" ng:autobind></script>
     <script type="text/javascript" src="http://www.google.com/jsapi"></script>
     <script type="text/javascript">
       google.load('visualization', '1', {packages: ['corechart']});
     </script>
     
-    <script>
+    <script type="text/javascript">
       function CashController() {
         this.sim_length = 6;
 
@@ -233,16 +234,29 @@
             }
 
             if (this.users.payment_frequency == 'yearly') {
+              var users_from_month = 0;
               var churn = 0;
               if (year_num > 0) {
+                // These were the users we got in the first year
+                var user_count = monthly_new;
+
                 // Some of the contracts for the users are renewed.
                 // We need to account for churn
-                churn = parseInt((monthly_new * year_num * churn_rate)/100);
-              }
+                for (var j = 0; j < year_num; j++) {
+                  var churn = parseInt(user_count * churn_rate / 100);
+                  var retained_users = user_count - churn;
+                  user_count = retained_users + monthly_new;
+                }
+                users_from_month = parseInt(user_count);
 
+              } else {
+                // We only have the new users from this year.
+                users_from_month = monthly_new;
+              }
               // Add new users this month
               users = users + monthly_new - churn;
-              income = income + monthly_new * price;
+
+              income = income + users_from_month * price;
             }
 
             cash = cash + income - expenses;
