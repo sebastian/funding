@@ -20,8 +20,6 @@
     <!--[if lt IE 9]>
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
-    
-
   </head>
   <body>
     <div class="container" ng:controller="CashController">
@@ -248,15 +246,18 @@
         };
 
         this.drawVisualization = function () {
-          var max = 0;
-          var min = 0;
+          if (this.graph_months.length == 1) { return; }
+
+          var maxY = 0;
+          var minY = 0;
 
           // Create and populate the data table.
           var graph_data = [['x', 'Cash', 'Income', 'Expenses', 'Users']];
-          for each (var month in this.graph_months) {
-            max = this.max_val(max, month);
-            min = this.min_val(min, month);
-            graph_data.push([month.name, month.cash, month.income, month.expenses, month.users])
+          for (var i = 0; i < this.graph_months.length; i++) {
+            var month = this.graph_months[i];
+            maxY = this.max_val(maxY, month);
+            minY = this.min_val(minY, month);
+            graph_data.push([month.name, month.cash, month.income, month.expenses, month.users]);
           }
           var data = google.visualization.arrayToDataTable(graph_data);
 
@@ -264,7 +265,7 @@
           new google.visualization.LineChart(document.getElementById('visualization')).
               draw(data, {curveType: "function",
                           height: 600,
-                          vAxis: {maxValue: max + 10, minValue: min - 10}}
+                          vAxis: {maxValue: maxY + 10, minValue: minY - 10}}
                   );
         };
 
